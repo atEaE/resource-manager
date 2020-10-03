@@ -16,8 +16,12 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "resource-manager.helloWorld",
-				"title": "Hello World"
+				"command": "resource-manager.Start",
+				"title": "Hello Start"
+			},
+			{
+				"command": "resource-manager.Post",
+				"title": "Hello Post"
 			}
 		]
 	},
