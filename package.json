@@ -43,6 +43,7 @@
 		"vscode-test": "^1.4.0"
 	},
 	"dependencies": {
+		"chart.js": "^2.9.4",
 		"systeminformation": "^4.28.1"
 	}
 }
