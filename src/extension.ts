@@ -5,6 +5,7 @@ import * as path from 'path';
 import { Template, TemplateEngine } from './utils/template';
 import { ResourceView } from './view/resourceView';
 import * as PubSub from 'pubsub-js';
+import { Battery, CpuUsage } from './cpus/resources';
 
 export function activate(context: ExtensionContext) {
 	// var resmng = new cpus.StatusBarResourceManager(window.createStatusBarItem(StatusBarAlignment.Left));
@@ -45,15 +46,25 @@ export function activate(context: ExtensionContext) {
 		})
 	);
 
+	let cpu = new CpuUsage();
+	let battery = new Battery();
+	let transition: string[] = [];
+
 	// Our new command
 	context.subscriptions.push(
 		commands.registerCommand('resource-manager.Post', () => {
-			setInterval(() => {
-				count++;
+			setInterval(async () => {
+				let usage = await cpu.watch();
+				let batPer = await battery.watch();
 				if (!currentPanel) {
 					return;
 				}
-				currentPanel.webview.postMessage({ command: 'refactor', counter: count });
+				transition.push(usage.toFixed(2));
+				currentPanel.webview.postMessage({
+					command: 'refactor',
+					cpu: transition,
+					battery: batPer.toFixed(2)
+				});
 			}, 1000);
 		})
 	  );
