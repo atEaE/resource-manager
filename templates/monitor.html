@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cat Coding</title>
+    <title>Resource Monitor</title>
+    <script src="{scripts}/Chart.min.js"></script>
 </head>
 <body>
     <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="300" />
@@ -14,11 +15,55 @@
     <div>
         <h1 id="title-battery">Battery</h1>
         <h4 id="battery-counter">0</h4>
-    </div>    
+    </div>
+    <div class="chart-field">
+        <canvas id="chart-canvas" width="400" height="400"></canvas>
+    </div>
 
     <script>
         const cpuCounter = document.getElementById('cpu-counter');
         const batteryCounter = document.getElementById('battery-counter');
+
+        let chart;
+        let chartContext = document.getElementById('chart-canvas').getContext('2d');
+        let chartConfig = {
+            type: 'bar',
+            data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        }
+
+        chart = new Chart(chartContext, chartConfig);
 
         // Handle the message inside the webview
         window.addEventListener('message', event => {
