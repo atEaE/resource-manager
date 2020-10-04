@@ -4,7 +4,6 @@ import * as cpus from './cpus';
 import * as path from 'path';
 import { Template, TemplateEngine } from './utils/template';
 import { ResourceView } from './view/resourceView';
-import * as PubSub from 'pubsub-js';
 import { Battery, CpuUsage } from './cpus/resources';
 
 export function activate(context: ExtensionContext) {
@@ -24,8 +23,14 @@ export function activate(context: ExtensionContext) {
 				tmp = new Template("sample", "<html></html>");
 			}
 	
-			let scriptsPath = Uri.file(path.join(context.extensionPath, './node_modules/chart.js/dist'))
+			let scriptMomentPath = Uri.file(path.join(context.extensionPath, './node_modules/moment'))
 									.with({scheme: 'vscode-resource'}).toString(true);
+			let scriptChartPath = Uri.file(path.join(context.extensionPath, './node_modules/chart.js/dist'))
+									.with({scheme: 'vscode-resource'}).toString(true);
+			let scriptPluginPath = Uri.file(path.join(context.extensionPath, './node_modules/chartjs-plugin-streaming/dist'))
+									.with({scheme: 'vscode-resource'}).toString(true);
+
+			let assetsPath = Uri.file(path.join(context.extensionPath, 'assets'))
 
 			currentPanel = window.createWebviewPanel(
 			  'catCoding',
@@ -35,7 +40,11 @@ export function activate(context: ExtensionContext) {
 				enableScripts: true
 			  }
 			);
-			currentPanel.webview.html = tmp.bind({ scripts: scriptsPath });
+			currentPanel.webview.html = tmp.bind({
+				scriptMoment: scriptMomentPath,
+				scriptChart: scriptChartPath,
+				scriptPlugin: scriptPluginPath,
+			});
 			currentPanel.onDidDispose(
 			() => {
 				currentPanel = undefined;

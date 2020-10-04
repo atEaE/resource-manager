@@ -4,10 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resource Monitor</title>
-    <script src="{scripts}/Chart.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script type="text/javascript" src="{scriptMoment}/moment.js"></script>
+    <script type="text/javascript" src="{scriptChart}/Chart.min.js"></script>
+    <script type="text/javascript" src="{scriptPlugin}/chartjs-plugin-streaming.js"></script>
 </head>
 <body>
-    <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="300" />
+    <div class="row">
+        <div class="col-sm-6 col-md-3">
+            <h3>CPU Usage</h3>
+            <canvas id="chart-canvas-1" width="200" height="200"></canvas>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <h3>Memory</h3>
+            <canvas id="chart-canvas-2" width="200" height="200"></canvas>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <h3>Disk I/O</h3>
+            <canvas id="chart-canvas-3" width="200" height="200"></canvas>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <h3>Wifi</h3>
+            <canvas id="chart-canvas-4" width="200" height="200"></canvas>
+        </div>
+    </div>
+    <!--
     <div>
         <h1 id="title-cpu">CPU</h1>
         <h4 id="cpu-counter">0</h4>
@@ -16,54 +37,95 @@
         <h1 id="title-battery">Battery</h1>
         <h4 id="battery-counter">0</h4>
     </div>
-    <div class="chart-field">
-        <canvas id="chart-canvas" width="400" height="400"></canvas>
-    </div>
+    -->
 
     <script>
         const cpuCounter = document.getElementById('cpu-counter');
         const batteryCounter = document.getElementById('battery-counter');
 
-        let chart;
-        let chartContext = document.getElementById('chart-canvas').getContext('2d');
-        let chartConfig = {
-            type: 'bar',
+        let chart1;
+        let chartContext1 = document.getElementById('chart-canvas-1').getContext('2d');
+        let chartConfig1 = {
+            type: 'line',
             data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
+                datasets: [{
+                    data: []
+                }, {
+                    data: []
+                }]
             },
             options: {
                 scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        }
+                    xAxes: [{
+                        type: 'realtime'
                     }]
                 }
             }
         }
+        chart1 = new Chart(chartContext1, chartConfig1);
 
-        chart = new Chart(chartContext, chartConfig);
+        let chart2;
+        let chartContext2 = document.getElementById('chart-canvas-2').getContext('2d');
+        let chartConfig2 = {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data: []
+                }, {
+                    data: []
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'realtime'
+                    }]
+                }
+            }
+        }
+        chart2 = new Chart(chartContext2, chartConfig2);
+
+        let chart3;
+        let chartContext3 = document.getElementById('chart-canvas-3').getContext('2d');
+        let chartConfig3 = {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data: []
+                }, {
+                    data: []
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'realtime'
+                    }]
+                }
+            }
+        }
+        chart3 = new Chart(chartContext3, chartConfig3);
+
+        let chart4;
+        let chartContext4 = document.getElementById('chart-canvas-4').getContext('2d');
+        let chartConfig4 = {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data: []
+                }, {
+                    data: []
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'realtime'
+                    }]
+                }
+            }
+        }
+        chart4 = new Chart(chartContext4, chartConfig4);
 
         // Handle the message inside the webview
         window.addEventListener('message', event => {
