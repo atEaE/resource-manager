@@ -16,8 +16,8 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "resource-manager.Start",
-				"title": "Hello Start"
+				"command": "resource-manager.show",
+				"title": "Show Resource Manager"
 			},
 			{
 				"command": "resource-manager.Post",
