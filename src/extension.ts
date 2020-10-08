@@ -1,5 +1,5 @@
 'use strict'
-import { ExtensionContext, StatusBarAlignment, window, commands, ViewColumn, Uri, WebviewPanel } from 'vscode';
+import { ExtensionContext, window, commands, ViewColumn, Uri, WebviewPanel } from 'vscode';
 import * as cpus from './cpus';
 import * as path from 'path';
 import { Template, TemplateEngine } from './utils/template';
@@ -23,27 +23,21 @@ export function activate(context: ExtensionContext) {
 				tmp = new Template("sample", "<html></html>");
 			}
 	
-			let scriptMomentPath = Uri.file(path.join(context.extensionPath, './node_modules/moment'))
+			let dependenciesModulePath = Uri.file(path.join(context.extensionPath, './node_modules'))
 									.with({scheme: 'vscode-resource'}).toString(true);
-			let scriptChartPath = Uri.file(path.join(context.extensionPath, './node_modules/chart.js/dist'))
-									.with({scheme: 'vscode-resource'}).toString(true);
-			let scriptPluginPath = Uri.file(path.join(context.extensionPath, './node_modules/chartjs-plugin-streaming/dist'))
-									.with({scheme: 'vscode-resource'}).toString(true);
-
-			let assetsPath = Uri.file(path.join(context.extensionPath, 'assets'))
 
 			currentPanel = window.createWebviewPanel(
-			  'catCoding',
-			  'Cat Coding',
-			  ViewColumn.One,
-			  {
-				enableScripts: true
-			  }
+				'resource-manager',
+				'Resource Manager',
+				ViewColumn.One,
+				{
+					enableScripts: true
+				}
 			);
+			currentPanel.iconPath = Uri.file(path.join(context.extensionPath, './assets/img/chart.png'))
+
 			currentPanel.webview.html = tmp.bind({
-				scriptMoment: scriptMomentPath,
-				scriptChart: scriptChartPath,
-				scriptPlugin: scriptPluginPath,
+				dependencies: dependenciesModulePath,
 			});
 			currentPanel.onDidDispose(
 			() => {
