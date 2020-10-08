@@ -8,134 +8,210 @@
     <script type="text/javascript" src="{dependencies}/moment/moment.js"></script>
     <script type="text/javascript" src="{dependencies}/chart.js/dist/Chart.min.js"></script>
     <script type="text/javascript" src="{dependencies}/chartjs-plugin-streaming/dist/chartjs-plugin-streaming.js"></script>
+    <style>
+        .custom-card-wrapper {
+            padding: 8px 10px 8px;
+        }
+        .custom-card {
+            border: 1px solid var(--vscode-panel-border);
+        }
+        .custom-header {
+            background-color: var(--vscode-sideBar-background);
+        }
+    </style>
 </head>
-<body>
+<body style="background-color: transparent; color: var(--vscode-editor-foreground);">
     <div class="row">
-        <div class="col-sm-6 col-md-3">
-            <h3>CPU Usage</h3>
-            <canvas id="chart-canvas-1" width="200" height="200"></canvas>
+        <div class="col-md-3 custom-card-wrapper">
+            <div class="card custom-card">
+                <div class="card-header custom-header">CPU Usage</div>
+                <canvas id="chart-canvas-cpu" width="200" height="200"></canvas>
+            </div>
         </div>
-        <div class="col-sm-6 col-md-3">
-            <h3>Memory</h3>
-            <canvas id="chart-canvas-2" width="200" height="200"></canvas>
+        <div class="col-md-3 custom-card-wrapper">
+            <div class="card custom-card">
+                <div class="card-header custom-header">Memory</div>
+                <canvas id="chart-canvas-mem" width="200" height="200"></canvas>
+            </div>
         </div>
-        <div class="col-sm-6 col-md-3">
-            <h3>Disk I/O</h3>
-            <canvas id="chart-canvas-3" width="200" height="200"></canvas>
+        <div class="col-md-3 custom-card-wrapper">
+            <div class="card custom-card">
+                <div class="card-header custom-header">Disk I/O</div>
+                <canvas id="chart-canvas-disk" width="200" height="200"></canvas>
+            </div>
         </div>
-        <div class="col-sm-6 col-md-3">
-            <h3>Wifi</h3>
-            <canvas id="chart-canvas-4" width="200" height="200"></canvas>
+        <div class="col-md-3 custom-card-wrapper">
+            <div class="card custom-card">
+                <div class="card-header custom-header">Wifi</div>
+                <canvas id="chart-canvas-4" width="200" height="200"></canvas>
+            </div>
         </div>
     </div>
-    <!--
-    <div>
-        <h1 id="title-cpu">CPU</h1>
-        <h4 id="cpu-counter">0</h4>
-    </div>
-    <div>
-        <h1 id="title-battery">Battery</h1>
-        <h4 id="battery-counter">0</h4>
-    </div>
-    -->
-
     <script>
-        const cpuCounter = document.getElementById('cpu-counter');
-        const batteryCounter = document.getElementById('battery-counter');
-
-        let chart1;
-        let chartContext1 = document.getElementById('chart-canvas-1').getContext('2d');
-        let chartConfig1 = {
+        // Cpu Usage --- start ---
+        let chartCpuCntx = document.getElementById('chart-canvas-cpu').getContext('2d');
+        let chartCpuConf = {
             type: 'line',
             data: {
                 datasets: [{
-                    data: []
-                }, {
+                    label: 'cpu',
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    fill: false,
+                    lineTension: 0,
                     data: []
                 }]
             },
             options: {
                 scales: {
                     xAxes: [{
-                        type: 'realtime'
+                        type: 'realtime',
+                        realtime: {
+                            duration: 20000,
+                            refresh: 1000,
+                            delay: 2000,
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 100,
+                        }
                     }]
                 }
             }
         }
-        chart1 = new Chart(chartContext1, chartConfig1);
+        const chartCpuUsage = new Chart(chartCpuCntx, chartCpuConf);
+        // Cpu Usage ---  end  ---
 
-        let chart2;
-        let chartContext2 = document.getElementById('chart-canvas-2').getContext('2d');
-        let chartConfig2 = {
+        // Memory    --- start ---
+        let chartMemCntx = document.getElementById('chart-canvas-mem').getContext('2d');
+        let chartMemConf = {
             type: 'line',
             data: {
                 datasets: [{
-                    data: []
-                }, {
+                    label: 'memory',
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
                     data: []
                 }]
             },
             options: {
                 scales: {
                     xAxes: [{
-                        type: 'realtime'
+                        type: 'realtime',
+                        realtime: {
+                            duration: 20000,
+                            refresh: 1000,
+                            delay: 2000,
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 100,
+                        }
                     }]
                 }
             }
         }
-        chart2 = new Chart(chartContext2, chartConfig2);
+        const chartMem = new Chart(chartMemCntx, chartMemConf);
+        // Memory    ---  end  ---
 
-        let chart3;
-        let chartContext3 = document.getElementById('chart-canvas-3').getContext('2d');
-        let chartConfig3 = {
+        // Disk      --- start ---
+        let chartDiskCntx = document.getElementById('chart-canvas-disk').getContext('2d');
+        let chartDiskConf = {
             type: 'line',
             data: {
                 datasets: [{
-                    data: []
-                }, {
+                    label: 'disk',
+                    borderColor: 'rgb(20, 158, 20)',
+                    backgroundColor: 'rgba(20, 158, 20, 0.5)',
                     data: []
                 }]
             },
             options: {
                 scales: {
                     xAxes: [{
-                        type: 'realtime'
+                        type: 'realtime',
+                        realtime: {
+                            duration: 20000,
+                            refresh: 1000,
+                            delay: 2000,
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 100,
+                        }
                     }]
                 }
             }
         }
-        chart3 = new Chart(chartContext3, chartConfig3);
+        const chartDisk = new Chart(chartDiskCntx, chartDiskConf);
+        // Disk      ---  end  ---
 
-        let chart4;
-        let chartContext4 = document.getElementById('chart-canvas-4').getContext('2d');
-        let chartConfig4 = {
+        // Wifi      --- start --- 
+        let chartWifiCntx = document.getElementById('chart-canvas-4').getContext('2d');
+        let chartWifiConf = {
             type: 'line',
             data: {
                 datasets: [{
-                    data: []
-                }, {
+                    label: 'wifi',
+                    borderColor: 'rgb(255, 215, 15)',
+                    backgroundColor: 'rgba(255, 215, 15, 0.5)',
                     data: []
                 }]
             },
             options: {
                 scales: {
                     xAxes: [{
-                        type: 'realtime'
+                        type: 'realtime',
+                        realtime: {
+                            duration: 20000,
+                            refresh: 1000,
+                            delay: 2000,
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 100,
+                        }
                     }]
                 }
             }
         }
-        chart4 = new Chart(chartContext4, chartConfig4);
+        const chartWifi = new Chart(chartWifiCntx, chartWifiConf);
+        // Wifi      ---  end  --- 
 
-        // Handle the message inside the webview
+        /**
+         * refresh chart.
+         * @param chart chart instance.
+         * @param value update value.
+         */
+        function onRefresh(chart, value) {
+            chart.config.data.datasets.forEach(function(dataset) {
+                dataset.data.push({
+                    x: Date.now(),
+                    y: value
+                });
+            });
+        }
+
+        /**
+         * Handle the message inside the webview
+         */
         window.addEventListener('message', event => {
-
             const message = event.data; // The JSON data our extension sent
-
             switch (message.command) {
                 case 'refactor':
-                    cpuCounter.textContent = message.cpu;
-                    batteryCounter.textContent = message.battery;
+                    onRefresh(chartCpuUsage, message.cpu)
                     break;
                 case 'load':
                     break;
