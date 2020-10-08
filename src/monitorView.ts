@@ -1,60 +1,67 @@
-import { WebviewPanelSerializer, WebviewPanel, ViewColumn, Uri, window } from 'vscode';
-import { Template } from './utils/template';
+import { Uri, ViewColumn, WebviewPanel, WebviewView, window } from 'vscode';
+import { Template, TemplateEngine } from './utils/template';
 import * as path from 'path';
+import { CompositeDisposable } from './utils/disposable';
+import { Logger } from './utils/logger';
 
+export class ResourceMonitorView extends CompositeDisposable {
 
-export class MonitorPreviewSeriializer implements WebviewPanelSerializer {
+    /**
+     * The current Resource Monitor View instance(singleton)
+     */
+    public static currentPanel: ResourceMonitorView | undefined;
 
     private extensionPath: string;
-    private template: Template;
-    private preview?: MonitorPreview;
+    private logger: Logger;
+    private panel: WebviewPanel | undefined;
 
-    constructor(extensionPath: string, tempalte: Template) {
-        this.extensionPath = extensionPath;
-        this.template = tempalte;
-    }
-
-    async deserializeWebviewPanel(panel: WebviewPanel, state: any) {
-        const column = panel.viewColumn ?? ViewColumn.One;
-    }
-}
-
-export class MonitorPreview {
-    private title: string = "sample";
-    private extensionPath: string;
-    private uri: Uri;
-    private htmlContent: string = '';
-    private panel: WebviewPanel;
-
-    constructor(extensionPath: string, uri: Uri, viewColumn: ViewColumn, template: Template, panel?: WebviewPanel) {
-        this.extensionPath = extensionPath;
-        this.uri = uri;
-
-        let scriptMomentPath = Uri.file(path.join(this.extensionPath, './node_modules/moment/dist'))
-                                    .with({scheme: 'vscode-resource'}).toString(true);
-        let scriptChartPath = Uri.file(path.join(this.extensionPath, './node_modules/chart.js/dist'))
-                                    .with({scheme: 'vscode-resource'}).toString(true);
-        let scriptPluginPath = Uri.file(path.join(this.extensionPath, './node_modules/chartjs-plugin-streaming/dist'))
-                                    .with({scheme: 'vscode-resource'}).toString(true);
-        this.htmlContent = template.bind({
-            scriptMoment: scriptMomentPath,
-            scriptChart: scriptChartPath,
-            scriptPlugin: scriptPluginPath,
-        });
-        this.panel = this.initWebviewPanel(viewColumn, panel);
-    }
-
-    private initWebviewPanel(viewColumn: ViewColumn, panel?: WebviewPanel): WebviewPanel {
-        var result = panel;
-        if (!result) {
-            // create new webview panel
-            result = window.createWebviewPanel('resource-manager', this.title, viewColumn);
+    /**
+     * 
+     * @param extensionPath vscode extension path.
+     * @param logger logger instance.
+     */
+    public static createOrActive(extensionPath: string, logger: Logger) {
+        if (ResourceMonitorView.currentPanel) {
+            this.currentPanel?.sendMessage({ command: 'load' })
+            return;
+        } else {
+            ResourceMonitorView.currentPanel = new ResourceMonitorView(extensionPath, logger);
         }
-
-        return result;
     }
 
-    public configure(): void {
-        this.panel.webview.html = this.htmlContent;
+    /**
+     * Create new ResourceMonitor view instance.
+     * @param extensionPath vscode extension path.
+     * @param logger logger instance.
+     */
+    private constructor(extensionPath: string, logger: Logger) {
+        super();
+        this.extensionPath = extensionPath;
+        this.logger = logger;
+
+        const engine = new TemplateEngine(path.join(this.extensionPath,'templates')).load();
+        let template = engine.find('monitor.html');
+        if (!template) {
+            template = new Template("sample", "<html></html>");
+        }
+        let dependenciesModulePath = Uri.file(path.join(this.extensionPath, './node_modules')).with({scheme: 'vscode-resource'}).toString(true);
+        this.panel = window.createWebviewPanel('resource-manager', 'Resource Manager', ViewColumn.One, {
+            enableScripts: true
+        })
+        this.panel.iconPath = Uri.file(path.join(this.extensionPath, './assets/img/chart.png'))
+        this.panel.webview.html = template.bind({
+            dependencies: dependenciesModulePath,
+        });
+        this.registDisposable(this.panel.onDidDispose(() => {
+            this.panel = undefined;
+            this.dispose()
+        },
+        ));
+    }
+
+    private sendMessage(msg: any) {
+        if (this.panel) {
+            this.panel.webview.postMessage(msg);
+        }
     }
 }

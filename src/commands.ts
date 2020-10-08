@@ -1,9 +1,8 @@
 'use strict'
-import { commands, ExtensionContext, Uri, window, ViewColumn } from 'vscode';
-import * as path from 'path';
+import { commands, ExtensionContext } from 'vscode';
 import { CompositeDisposable } from "./utils/disposable";
-import { Template, TemplateEngine } from './utils/template';
 import { Logger } from "./utils/logger";
+import { ResourceMonitorView } from './monitorView';
 
 /**
  * A dedicated class for command management
@@ -39,36 +38,6 @@ export class CommandManager extends CompositeDisposable {
      * @param arg any argument
      */
     private show(arg: any) {
-        let currentPanel;
-        const engine = new TemplateEngine(this.context.asAbsolutePath('templates')).load();
-        var template = engine.find('monitor.html');
-        if (!template) {
-            template = new Template("sample", "<html></html>");
-        }
-        let dependenciesModulePath = Uri.file(path.join(this.context.extensionPath, './node_modules'))
-                                        .with({scheme: 'vscode-resource'}).toString(true);
-
-        currentPanel = window.createWebviewPanel(
-            'resource-manager',
-            'Resource Manager',
-            ViewColumn.One,
-            {
-            enableScripts: true
-            }
-        );
-
-        currentPanel.iconPath = Uri.file(path.join(this.context.extensionPath, './assets/img/chart.png'))
-
-        currentPanel.webview.html = template.bind({
-            dependencies: dependenciesModulePath,
-        });
-
-        currentPanel.onDidDispose(
-            () => {
-                currentPanel = undefined;
-            },
-            undefined,
-            this.context.subscriptions
-        );
+        ResourceMonitorView.createOrActive(this.context.extensionPath, this.logger);
     }
 }
