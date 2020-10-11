@@ -1,10 +1,11 @@
 'use strict';
 import * as si from 'systeminformation'; 
+import { Disposable } from 'vscode';
 
 /**
  * CPU Resource interface.
  */
-export interface IResource {
+export interface Resource extends Disposable {
     /**
      * Check the status of the CPU resources.
      */
@@ -14,7 +15,7 @@ export interface IResource {
 /**
  * Battery resource(Usage)
  */
-export class Battery implements IResource {
+export class Battery implements Resource {
     /**
      * Check the status of the CPU resources.
      */
@@ -22,18 +23,51 @@ export class Battery implements IResource {
         let batteryInfo = await si.battery();
         return Math.min(Math.max(batteryInfo.percent, 0), 100);
     }
+
+    /**
+     * Release the resource.
+     */
+    public dispose() {}
 }
 
 /**
  * CPU resource(Usage)
  */
-export class CpuUsage implements IResource {
+export class CpuUsage implements Resource {
     /**
      * Check the status of the CPU resources.
      */
     public async watch(): Promise<number> {
         let currentLoad = await si.currentLoad();
         return 100 - currentLoad.currentload_idle;
+    }
+
+    /**
+     * Release the resource.
+     */
+    public dispose() {}
+}
+
+export class Memory implements Resource {
+    /**
+     * Check the status of the Memory resources.
+     */
+    public async watch(): Promise<number> {
+        let memInfo = await si.mem();
+        return memInfo.active / (1024 * 1024 * 1024);
+    }
+
+    /**
+     * Release the resource.
+     */
+    public dispose() {}
+
+    /**
+     * memory total
+     */
+    public async total() {
+        let total = (await si.mem()).total;
+        return total / (1024 * 1024 * 1024);
     }
 }
 

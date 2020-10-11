@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 import { commands, ExtensionContext } from 'vscode';
 import { CompositeDisposable } from "./utils/disposable";
 import { Logger } from "./utils/logger";

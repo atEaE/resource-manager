@@ -1,6 +1,9 @@
-'use strict'
+'use strict';
 import { Disposable} from 'vscode';
 
+/**
+ * Composite disposable class
+ */
 export class CompositeDisposable implements Disposable {
     private disposables: Disposable[] = [];
 
@@ -16,4 +19,14 @@ export class CompositeDisposable implements Disposable {
     protected registDisposables(...disposables: Disposable[]) {
         this.disposables.push(...disposables);
     }
+}
+
+/**
+ * convert disposable object.
+ * @param fn wrap function.
+ */
+export function toDisposable(fn: () => void): Disposable {
+	return {
+		dispose: fn
+	};
 }

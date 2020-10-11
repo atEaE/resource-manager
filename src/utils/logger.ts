@@ -29,15 +29,23 @@ export class Logger {
     public outputLog(logLevel: LogLevel, message: string) {
         switch(logLevel) {
             case 'ERROR':
-                if (this.isOutput(logLevel)) console.error(logLevel + message);
+                if (this.isOutput(logLevel)) { 
+                    console.error(logLevel + message);
+                }
                 break;
             case 'WARN':
-                if (this.isOutput(logLevel)) console.error(logLevel + message);
+                if (this.isOutput(logLevel)) {
+                    console.error(logLevel + message);
+                }
                 break;
             case 'INFO':
-                if (this.isOutput(logLevel)) console.log(logLevel + message);
+                if (this.isOutput(logLevel)) {
+                    console.log(logLevel + message);
+                }
             default:
-                if (this.isOutput(logLevel)) console.log(logLevel + message)
+                if (this.isOutput(logLevel)) {
+                    console.log(logLevel + message);
+                }
         }
     }
 

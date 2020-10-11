@@ -1,8 +1,16 @@
-'use strict'
+'use strict';
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * WebviewPanel template engine
+ */
 export class TemplateEngine {
+    /**
+     * dummy template.
+     */
+    public dummy: Template = new Template("dummy", notFoundTemplate);
+
     /**
      * Template folder to inspect.
      */
@@ -37,7 +45,7 @@ export class TemplateEngine {
      * @param name Template name.
      */
     public find(name: string): Template | undefined {
-        return this.templates.find(t => t.name === name)
+        return this.templates.find(t => t.name === name);
     }
 }
 
@@ -53,7 +61,7 @@ export class Template {
     /**
      * Template file content.
      */
-    public content: string;
+    private content: string;
 
     /**
      * Create new Template instance.
@@ -77,3 +85,18 @@ export class Template {
         return cnts;
     }
 }
+
+/**
+ * notfound template.
+ */
+const notFoundTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resource Manager</title>
+</head>
+<body>
+<h1>Sorry. NotFound Template.</h1>
+</body>
+</html>`;

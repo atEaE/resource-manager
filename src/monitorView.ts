@@ -1,8 +1,10 @@
-import { Uri, ViewColumn, WebviewPanel, WebviewView, window } from 'vscode';
+import { Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { Template, TemplateEngine } from './utils/template';
 import * as path from 'path';
-import { CompositeDisposable } from './utils/disposable';
+import { CompositeDisposable, toDisposable } from './utils/disposable';
 import { Logger } from './utils/logger';
+import { CpuUsage, Memory, Resource } from './cpus/resources';
+
 
 export class ResourceMonitorView extends CompositeDisposable {
 
@@ -14,6 +16,8 @@ export class ResourceMonitorView extends CompositeDisposable {
     private extensionPath: string;
     private logger: Logger;
     private panel: WebviewPanel | undefined;
+    private engine: TemplateEngine;
+    private resources: { [name: string]: Resource } = {};
 
     /**
      * 
@@ -22,10 +26,11 @@ export class ResourceMonitorView extends CompositeDisposable {
      */
     public static createOrActive(extensionPath: string, logger: Logger) {
         if (ResourceMonitorView.currentPanel) {
-            this.currentPanel?.sendMessage({ command: 'load' })
+            this.currentPanel?.sendMessage({ command: 'load' });
             return;
         } else {
             ResourceMonitorView.currentPanel = new ResourceMonitorView(extensionPath, logger);
+            ResourceMonitorView.currentPanel.setup();
         }
     }
 
@@ -38,28 +43,67 @@ export class ResourceMonitorView extends CompositeDisposable {
         super();
         this.extensionPath = extensionPath;
         this.logger = logger;
-
-        const engine = new TemplateEngine(path.join(this.extensionPath,'templates')).load();
-        let template = engine.find('monitor.html');
-        if (!template) {
-            template = new Template("sample", "<html></html>");
-        }
-        let dependenciesModulePath = Uri.file(path.join(this.extensionPath, './node_modules')).with({scheme: 'vscode-resource'}).toString(true);
-        this.panel = window.createWebviewPanel('resource-manager', 'Resource Manager', ViewColumn.One, {
-            enableScripts: true
-        })
-        this.panel.iconPath = Uri.file(path.join(this.extensionPath, './assets/img/chart.png'))
-        this.panel.webview.html = template.bind({
-            dependencies: dependenciesModulePath,
-        });
-        this.registDisposable(this.panel.onDidDispose(() => {
-            this.panel = undefined;
-            this.dispose()
-        },
-        ));
+        this.engine = new TemplateEngine(path.join(this.extensionPath,'templates')).load();
     }
 
-    private sendMessage(msg: any) {
+    /**
+     * setup monitorview instance.
+     */
+    public async setup() {
+        let template = this.engine.find('monitor.html');        
+        if (!template) {
+            template = this.engine.dummy;
+            return;
+        }
+
+        this.resources['cpu'] = new CpuUsage();
+        this.resources['mem'] = new Memory();
+
+        // create webview.
+        this.panel = window.createWebviewPanel('resource-manager', 'Resource Manager', ViewColumn.One, {
+            enableScripts: true
+        });
+        this.panel.iconPath = Uri.file(path.join(this.extensionPath, './assets/img/chart.png'));
+
+        // bind data
+        let dependenciesModulePath = Uri.file(path.join(this.extensionPath, './node_modules')).with({scheme: 'vscode-resource'}).toString(true);
+        let memTotal = await (this.resources['mem'] as Memory).total();
+        this.panel.webview.html = template.bind({
+            dependencies: dependenciesModulePath,
+            memTotal: memTotal,
+        });
+
+        // regist disposable
+        this.registDisposable(this.panel.onDidDispose(() => {
+                this.panel = undefined;
+                this.dispose();
+            },
+        ));
+
+        var id = setInterval(async () => {
+            let usage = await this.resources['cpu'].watch();
+            let mem = await this.resources['mem'].watch();
+            if (!ResourceMonitorView.currentPanel) {
+                return;
+            }
+
+            ResourceMonitorView.currentPanel.sendMessage({
+                command: 'refactor',
+                cpu: usage,
+                mem: mem,
+            });
+        }, 1000);
+        this.registDisposable(toDisposable(() => {
+            clearInterval(id);
+        }));
+
+        // TODO : webview postMessage receiving logic
+        // this.registDisposable(this.panel.webview.onDidReceiveMessage((data) => {
+        //     console.log(data.value);
+        // }))
+    }
+
+    public sendMessage(msg: any) {
         if (this.panel) {
             this.panel.webview.postMessage(msg);
         }

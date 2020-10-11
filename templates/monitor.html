@@ -54,11 +54,9 @@
             type: 'line',
             data: {
                 datasets: [{
-                    label: 'cpu',
+                    label: 'cpu (%)',
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    fill: false,
-                    lineTension: 0,
                     data: []
                 }]
             },
@@ -91,7 +89,7 @@
             type: 'line',
             data: {
                 datasets: [{
-                    label: 'memory',
+                    label: 'memory (GiB)',
                     borderColor: 'rgb(54, 162, 235)',
                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                     data: []
@@ -111,7 +109,7 @@
                         ticks: {
                             beginAtZero: true,
                             min: 0,
-                            max: 100,
+                            max: {memTotal},
                         }
                     }]
                 }
@@ -211,12 +209,19 @@
             const message = event.data; // The JSON data our extension sent
             switch (message.command) {
                 case 'refactor':
-                    onRefresh(chartCpuUsage, message.cpu)
+                    onRefresh(chartCpuUsage, message.cpu);
+                    onRefresh(chartMem, message.mem);
                     break;
                 case 'load':
                     break;
             }
         });
+
+        // TODO : background process postMessage logic
+        // const vscode = acquireVsCodeApi();
+        // document.querySelector('.add-sample-button').addEventListener('click', () => {
+        //     vscode.postMessage({ type: 'sample', value: 'hogehoge'})
+        // });
     </script>
 </body>
 </html>
