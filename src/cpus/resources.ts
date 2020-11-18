@@ -7,6 +7,11 @@ import { Disposable } from 'vscode';
  */
 export interface Resource extends Disposable {
     /**
+     * Resource identifier name.
+     */
+    name(): string;
+
+    /**
      * Check the status of the CPU resources.
      */
     watch(): Promise<number>;
@@ -16,6 +21,13 @@ export interface Resource extends Disposable {
  * Battery resource(Usage)
  */
 export class Battery implements Resource {
+    /**
+     * Resource identifier name.
+     */
+    public name(): string {
+        return "battery"
+    }
+
     /**
      * Check the status of the CPU resources.
      */
@@ -35,6 +47,13 @@ export class Battery implements Resource {
  */
 export class CpuUsage implements Resource {
     /**
+     * Resource identifier name.
+     */
+    public name(): string {
+        return "cpu"
+    }
+
+    /**
      * Check the status of the CPU resources.
      */
     public async watch(): Promise<number> {
@@ -49,6 +68,13 @@ export class CpuUsage implements Resource {
 }
 
 export class Memory implements Resource {
+    /**
+     * Resource identifier name.
+     */
+    public name(): string {
+        return "memory"
+    }
+    
     /**
      * Check the status of the Memory resources.
      */
