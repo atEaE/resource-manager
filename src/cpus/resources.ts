@@ -68,11 +68,21 @@ export class CpuUsage implements Resource {
 }
 
 export class Memory implements Resource {
+    private totalSize: number = 0;
+
     /**
      * Resource identifier name.
      */
     public name(): string {
         return "memory";
+    }
+
+    /**
+     * Resource setup
+     */
+    public async setup(): Promise<Memory> {
+        this.totalSize = (await si.mem()).total;
+        return this;
     }
     
     /**
@@ -91,9 +101,57 @@ export class Memory implements Resource {
     /**
      * memory total
      */
-    public async total() {
-        let total = (await si.mem()).total;
-        return total / (1024 * 1024 * 1024);
+    public total(): number {
+        return this.totalSize / (1024 * 1024 * 1024);
+    }
+}
+
+export class Disk implements Resource {
+    private totalSize: number = 0;
+    private initUseSize: number = 0;
+
+    /**
+     * Resource identifier name.
+     */
+    public name(): string {
+        return "disk";
+    }
+
+    /**
+     * Resource setup
+     */
+    public async setup(): Promise<Disk> {
+        let fsInfos = await si.fsSize();
+        this.totalSize = fsInfos[0].size;
+        this.initUseSize = fsInfos[0].used;
+        return this;
+    }
+    
+    /**
+     * Check the status of the Memory resources.
+     */
+    public async watch(): Promise<number> {
+        let fsInfos = await si.fsSize();
+        return fsInfos[0].use;
+    }
+
+    /**
+     * Release the resource.
+     */
+    public dispose() {}
+
+    /**
+     * Disk total
+     */
+    public total(): number {
+        return this.totalSize;
+    }
+
+    /**
+     * Disk usage(init)
+     */
+    public usage(): number {
+        return this.initUseSize;
     }
 }
 
