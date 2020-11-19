@@ -21,29 +21,23 @@
     </style>
 </head>
 <body style="background-color: transparent; color: var(--vscode-editor-foreground);">
-    <div class="row">
-        <div class="col-md-3 custom-card-wrapper">
+    <div class="row row-height">
+        <div class="col-md-4 col-sm-6 custom-card-wrapper">
             <div class="card custom-card">
                 <div class="card-header custom-header">CPU Usage</div>
                 <canvas id="chart-canvas-cpu" width="200" height="200"></canvas>
             </div>
         </div>
-        <div class="col-md-3 custom-card-wrapper">
+        <div class="col-md-4 col-sm-6 custom-card-wrapper">
             <div class="card custom-card">
                 <div class="card-header custom-header">Memory</div>
                 <canvas id="chart-canvas-mem" width="200" height="200"></canvas>
             </div>
         </div>
-        <div class="col-md-3 custom-card-wrapper">
+        <div class="col-md-4 col-sm-6 custom-card-wrapper">
             <div class="card custom-card">
-                <div class="card-header custom-header">Disk I/O</div>
+                <div class="card-header custom-header">Disk</div>
                 <canvas id="chart-canvas-disk" width="200" height="200"></canvas>
-            </div>
-        </div>
-        <div class="col-md-3 custom-card-wrapper">
-            <div class="card custom-card">
-                <div class="card-header custom-header">Wifi</div>
-                <canvas id="chart-canvas-4" width="200" height="200"></canvas>
             </div>
         </div>
     </div>
@@ -121,72 +115,30 @@
         // Disk      --- start ---
         let chartDiskCntx = document.getElementById('chart-canvas-disk').getContext('2d');
         let chartDiskConf = {
-            type: 'line',
+            type: 'pie',
             data: {
                 datasets: [{
-                    label: 'disk',
-                    borderColor: 'rgb(20, 158, 20)',
-                    backgroundColor: 'rgba(20, 158, 20, 0.5)',
-                    data: []
-                }]
+                    label: 'disk (%)',
+                    data: [
+                        1234,
+                        322,
+                    ],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 99, 132, 0.5)',
+                    ],
+                }],
+                labels: [
+                    'Total',
+                    'Usage'
+                ]
             },
             options: {
-                scales: {
-                    xAxes: [{
-                        type: 'realtime',
-                        realtime: {
-                            duration: 20000,
-                            refresh: 1000,
-                            delay: 2000,
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 100,
-                        }
-                    }]
-                }
+                responsive: true,
             }
         }
         const chartDisk = new Chart(chartDiskCntx, chartDiskConf);
         // Disk      ---  end  ---
-
-        // Wifi      --- start --- 
-        let chartWifiCntx = document.getElementById('chart-canvas-4').getContext('2d');
-        let chartWifiConf = {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'wifi',
-                    borderColor: 'rgb(255, 215, 15)',
-                    backgroundColor: 'rgba(255, 215, 15, 0.5)',
-                    data: []
-                }]
-            },
-            options: {
-                scales: {
-                    xAxes: [{
-                        type: 'realtime',
-                        realtime: {
-                            duration: 20000,
-                            refresh: 1000,
-                            delay: 2000,
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 100,
-                        }
-                    }]
-                }
-            }
-        }
-        const chartWifi = new Chart(chartWifiCntx, chartWifiConf);
-        // Wifi      ---  end  --- 
 
         /**
          * refresh chart.
@@ -208,15 +160,11 @@
         window.addEventListener('message', event => {
             const message = event.data; // The JSON data our extension sent
             switch (message.command) {
-                case 'refactor':
-                    break;
                 case 'cpu':
                     onRefresh(chartCpuUsage, message.status)
                     break;
                 case 'memory':
                     onRefresh(chartMem, message.status);
-                    break;
-                case 'load':
                     break;
             }
         });
