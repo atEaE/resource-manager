@@ -17,7 +17,7 @@ export class ResourceMonitorView extends CompositeDisposable {
     private logger: Logger;
     private panel: WebviewPanel | undefined;
     private engine: TemplateEngine;
-    private resources: { [name: string]: Resource } = {};
+    private resources: Resource[] = [];
 
     /**
      * 
@@ -56,9 +56,6 @@ export class ResourceMonitorView extends CompositeDisposable {
             return;
         }
 
-        this.resources['cpu'] = new CpuUsage();
-        this.resources['mem'] = new Memory();
-
         // create webview.
         this.panel = window.createWebviewPanel('resource-manager', 'Resource Manager', ViewColumn.One, {
             enableScripts: true
@@ -67,11 +64,16 @@ export class ResourceMonitorView extends CompositeDisposable {
 
         // bind data
         let dependenciesModulePath = Uri.file(path.join(this.extensionPath, './node_modules')).with({scheme: 'vscode-resource'}).toString(true);
-        let memTotal = await (this.resources['mem'] as Memory).total();
+
+        // resource 
+        this.resources.push(new CpuUsage());
+        let mem = new Memory();
+        let memTotal = await mem.total();
         this.panel.webview.html = template.bind({
             dependencies: dependenciesModulePath,
             memTotal: memTotal,
         });
+        this.resources.push(mem);
 
         // regist disposable
         this.registDisposable(this.panel.onDidDispose(() => {
@@ -80,22 +82,26 @@ export class ResourceMonitorView extends CompositeDisposable {
             },
         ));
 
-        var id = setInterval(async () => {
-            let usage = await this.resources['cpu'].watch();
-            let mem = await this.resources['mem'].watch();
-            if (!ResourceMonitorView.currentPanel) {
-                return;
-            }
+        // set callback
+        var ids = this.resources.map(r => {
+            return setInterval(async () => {
+                let status = await r.watch();
+                if (!ResourceMonitorView.currentPanel) {
+                    return;
+                }
+                ResourceMonitorView.currentPanel.sendMessage({
+                    command: r.name(),
+                    status: status,
+                });
+            }, 1000);
+        });
 
-            ResourceMonitorView.currentPanel.sendMessage({
-                command: 'refactor',
-                cpu: usage,
-                mem: mem,
-            });
-        }, 1000);
-        this.registDisposable(toDisposable(() => {
-            clearInterval(id);
-        }));
+        // regist ids
+        ids.forEach(i => {
+            this.registDisposable(toDisposable(() => {
+                clearInterval(i);
+            }));
+        });
 
         // TODO : webview postMessage receiving logic
         // this.registDisposable(this.panel.webview.onDidReceiveMessage((data) => {

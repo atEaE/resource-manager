@@ -25,7 +25,7 @@ export class Battery implements Resource {
      * Resource identifier name.
      */
     public name(): string {
-        return "battery"
+        return "battery";
     }
 
     /**
@@ -50,7 +50,7 @@ export class CpuUsage implements Resource {
      * Resource identifier name.
      */
     public name(): string {
-        return "cpu"
+        return "cpu";
     }
 
     /**
@@ -72,7 +72,7 @@ export class Memory implements Resource {
      * Resource identifier name.
      */
     public name(): string {
-        return "memory"
+        return "memory";
     }
     
     /**
