@@ -72,8 +72,8 @@ export class ResourceMonitorView extends CompositeDisposable {
         this.panel.webview.html = template.bind({
             dependencies: dependenciesModulePath,
             memTotal: mem.total(),
-            diskUsage: disk.usage(),
-            diskTotal: disk.total(),
+            diskUsage: disk.usageSize(),
+            diskRemain: disk.remainingSize(),
         });
         this.resources.push(mem);
 

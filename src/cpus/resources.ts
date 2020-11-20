@@ -108,7 +108,8 @@ export class Memory implements Resource {
 
 export class Disk implements Resource {
     private totalSize: number = 0;
-    private initUseSize: number = 0;
+    private remainSize: number = 0;
+    private useSize: number = 0;
 
     /**
      * Resource identifier name.
@@ -123,7 +124,8 @@ export class Disk implements Resource {
     public async setup(): Promise<Disk> {
         let fsInfos = await si.fsSize();
         this.totalSize = fsInfos[0].size;
-        this.initUseSize = fsInfos[0].used;
+        this.useSize = fsInfos[0].used;
+        this.remainSize = this.totalSize - this.useSize;
         return this;
     }
     
@@ -141,17 +143,17 @@ export class Disk implements Resource {
     public dispose() {}
 
     /**
-     * Disk total
+     * Disk remaining size;
      */
-    public total(): number {
-        return this.totalSize;
+    public remainingSize(): number {
+        return this.remainSize / (1000 * 1000 * 1000);
     }
 
     /**
-     * Disk usage(init)
+     *Disk usage size;
      */
-    public usage(): number {
-        return this.initUseSize;
+    public usageSize(): number {
+        return this.useSize / (1000 * 1000 * 1000);
     }
 }
 

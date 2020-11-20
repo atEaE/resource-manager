@@ -118,19 +118,18 @@
             type: 'pie',
             data: {
                 datasets: [{
-                    label: 'disk (%)',
                     data: [
                         {diskUsage},
-                        {diskTotal},
+                        {diskRemain},
                     ],
                     backgroundColor: [
                         'rgba(54, 162, 235, 0.5)',
-                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(207, 200, 196, 0.5)',
                     ],
                 }],
                 labels: [
-                    'Total',
-                    'Usage'
+                    'Usage (GB)',
+                    'Remain (GB)',
                 ]
             },
             options: {
