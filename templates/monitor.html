@@ -19,6 +19,9 @@
             background-color: var(--vscode-sideBar-background);
         }
     </style>
+    <script>
+
+    </script>
 </head>
 <body style="background-color: transparent; color: var(--vscode-editor-foreground);">
     <div class="row row-height">
@@ -38,6 +41,25 @@
             <div class="card custom-card">
                 <div class="card-header custom-header">Disk</div>
                 <canvas id="chart-canvas-disk" width="200" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="row row-height">
+        <div class="col-md-12 custom-card-wrapper">
+            <div class="card custom-card">
+                <div class="card-header custom-header">Process</div>
+                <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th scope="col">PID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">State</th>
+                        <th scope="col">Cpu</th>
+                      </tr>
+                    </thead>
+                    <tbody id="process-table-body">
+                    </tbody>
+                  </table>
             </div>
         </div>
     </div>
@@ -138,6 +160,26 @@
         }
         const chartDisk = new Chart(chartDiskCntx, chartDiskConf);
         // Disk      ---  end  ---
+        
+
+        // table-sample
+        let tableCntx = document.getElementById('process-table-body');
+        for (i = 0; i < 10; i++) {
+            let tr = document.createElement('tr');
+            let pid = document.createElement('th');
+            let name = document.createElement('td');
+            let state = document.createElement('td');
+            let cpu = document.createElement('td'); 
+            pid.append(i);
+            name.append("hoge" + i);
+            state.append("active");
+            cpu.append(30);
+            tr.appendChild(pid);
+            tr.appendChild(name);
+            tr.appendChild(state);
+            tr.appendChild(cpu);
+            tableCntx.appendChild(tr);
+        }        
 
         /**
          * refresh chart.
