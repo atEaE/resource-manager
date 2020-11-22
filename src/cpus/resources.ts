@@ -1,6 +1,7 @@
 'use strict';
 import * as si from 'systeminformation'; 
 import { Disposable } from 'vscode';
+import { ResourceMonitorView } from '../monitorView';
 
 /**
  * CPU Resource interface.
@@ -14,13 +15,18 @@ export interface Resource extends Disposable {
     /**
      * Check the status of the CPU resources.
      */
-    watch(): Promise<number>;
+    update(view: ResourceMonitorView | undefined): void;
 }
 
 /**
  * Battery resource(Usage)
  */
 export class Battery implements Resource {
+    /**
+     * timeout id.
+     */
+    private intervalId?: NodeJS.Timeout
+
     /**
      * Resource identifier name.
      */
@@ -31,21 +37,39 @@ export class Battery implements Resource {
     /**
      * Check the status of the CPU resources.
      */
-    public async watch(): Promise<number> {
-        let batteryInfo = await si.battery();
-        return Math.min(Math.max(batteryInfo.percent, 0), 100);
+    public update(view: ResourceMonitorView | undefined): void {
+        this.intervalId = setInterval(async () => {
+            if (!view) {
+                return;
+            }
+
+            let batteryInfo = await si.battery();
+            view.sendMessage({
+                command: this.name(),
+                status: Math.min(Math.max(batteryInfo.percent, 0), 100),
+            })
+        }, 1000);
     }
 
     /**
      * Release the resource.
      */
-    public dispose() {}
+    public dispose() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId)
+        }
+    }
 }
 
 /**
  * CPU resource(Usage)
  */
 export class CpuUsage implements Resource {
+    /**
+     * timeout id.
+     */
+    private intervalId?: NodeJS.Timeout
+
     /**
      * Resource identifier name.
      */
@@ -56,18 +80,39 @@ export class CpuUsage implements Resource {
     /**
      * Check the status of the CPU resources.
      */
-    public async watch(): Promise<number> {
-        let currentLoad = await si.currentLoad();
-        return 100 - currentLoad.currentload_idle;
+    public update(view: ResourceMonitorView | undefined): void {
+        this.intervalId = setInterval(async () => {
+            if (!view) {
+                return;
+            }
+
+            let currentLoad = await si.currentLoad();
+            view.sendMessage({
+                command: this.name(),
+                status: 100 - currentLoad.currentload_idle,
+            })
+        }, 1000);
     }
 
     /**
      * Release the resource.
      */
-    public dispose() {}
+    public dispose() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId)
+        }
+    }
 }
 
 export class Memory implements Resource {
+    /**
+     * timeout id.
+     */
+    private intervalId?: NodeJS.Timeout
+
+    /**
+     * Total memory size.
+     */
     private totalSize: number = 0;
 
     /**
@@ -88,15 +133,28 @@ export class Memory implements Resource {
     /**
      * Check the status of the Memory resources.
      */
-    public async watch(): Promise<number> {
-        let memInfo = await si.mem();
-        return memInfo.active / (1024 * 1024 * 1024);
+    public update(view: ResourceMonitorView | undefined): void {
+        this.intervalId = setInterval(async () => {
+            if (!view) {
+                return;
+            }
+
+            let memInfo = await si.mem();
+            view.sendMessage({
+                command: this.name(),
+                status: memInfo.active / (1024 * 1024 * 1024),
+            })
+        }, 1000);
     }
 
     /**
      * Release the resource.
      */
-    public dispose() {}
+    public dispose() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId)
+        }
+    }
 
     /**
      * memory total
@@ -107,8 +165,24 @@ export class Memory implements Resource {
 }
 
 export class Disk implements Resource {
+    /**
+     * timeout id.
+     */
+    private intervalId?: NodeJS.Timeout
+
+    /**
+     * Disk total size.
+     */
     private totalSize: number = 0;
+
+    /**
+     * Disk remain size.
+     */
     private remainSize: number = 0;
+
+    /**
+     * Disk use size.
+     */
     private useSize: number = 0;
 
     /**
@@ -132,15 +206,28 @@ export class Disk implements Resource {
     /**
      * Check the status of the Memory resources.
      */
-    public async watch(): Promise<number> {
-        let fsInfos = await si.fsSize();
-        return fsInfos[0].use;
+    public update(view: ResourceMonitorView | undefined): void {
+        this.intervalId = setInterval(async () => {
+            if (!view) {
+                return;
+            }
+
+            let fsInfos = await si.fsSize();
+            view.sendMessage({
+                command: this.name(),
+                status: fsInfos[0].use,
+            })
+        }, 1000);
     }
 
     /**
      * Release the resource.
      */
-    public dispose() {}
+    public dispose() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId)
+        }
+    }
 
     /**
      * Disk remaining size;

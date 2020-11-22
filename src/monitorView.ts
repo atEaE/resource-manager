@@ -4,6 +4,7 @@ import * as path from 'path';
 import { CompositeDisposable, toDisposable } from './utils/disposable';
 import { Logger } from './utils/logger';
 import { CpuUsage, Disk, Memory, Resource } from './cpus/resources';
+import { resourceUsage } from 'process';
 
 
 export class ResourceMonitorView extends CompositeDisposable {
@@ -84,26 +85,11 @@ export class ResourceMonitorView extends CompositeDisposable {
             },
         ));
 
-        // set callback
-        var ids = this.resources.map(r => {
-            return setInterval(async () => {
-                let status = await r.watch();
-                if (!ResourceMonitorView.currentPanel) {
-                    return;
-                }
-                ResourceMonitorView.currentPanel.sendMessage({
-                    command: r.name(),
-                    status: status,
-                });
-            }, 1000);
-        });
-
-        // regist ids
-        ids.forEach(i => {
-            this.registDisposable(toDisposable(() => {
-                clearInterval(i);
-            }));
-        });
+        // resource update
+        this.resources.forEach(r => r.update(this));
+        
+        // regist dispose
+        this.resources.forEach(r => this.registDisposable(r));
 
         // TODO : webview postMessage receiving logic
         // this.registDisposable(this.panel.webview.onDidReceiveMessage((data) => {
