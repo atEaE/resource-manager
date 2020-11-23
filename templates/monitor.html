@@ -48,7 +48,7 @@
         <div class="col-md-12 custom-card-wrapper">
             <div class="card custom-card">
                 <div class="card-header custom-header">Process</div>
-                <table class="table table-sm">
+                <table id="process-table" class="table table-sm">
                     <thead>
                       <tr>
                         <th scope="col">PID</th>
@@ -161,26 +161,6 @@
         const chartDisk = new Chart(chartDiskCntx, chartDiskConf);
         // Disk      ---  end  ---
         
-
-        // table-sample
-        let tableCntx = document.getElementById('process-table-body');
-        for (i = 0; i < 10; i++) {
-            let tr = document.createElement('tr');
-            let pid = document.createElement('th');
-            let name = document.createElement('td');
-            let state = document.createElement('td');
-            let cpu = document.createElement('td'); 
-            pid.append(i);
-            name.append("hoge" + i);
-            state.append("active");
-            cpu.append(30);
-            tr.appendChild(pid);
-            tr.appendChild(name);
-            tr.appendChild(state);
-            tr.appendChild(cpu);
-            tableCntx.appendChild(tr);
-        }        
-
         /**
          * refresh chart.
          * @param chart chart instance.
@@ -195,6 +175,34 @@
             });
         }
 
+        function onTableRefrech(processes) {
+            const tableCntx = document.getElementById('process-table');
+            const tableBody = document.getElementById('process-table-body');
+            if (tableBody) {
+                tableBody.remove();
+            }
+            const newBody = document.createElement('tbody');
+            newBody.id = "process-table-body";
+            processes.forEach(p => {
+                let tr = document.createElement('tr');
+                let pid = document.createElement('th');
+                let name = document.createElement('td');
+                let state = document.createElement('td');
+                let cpu = document.createElement('td');
+
+                pid.append(p.pid);
+                name.append(p.name);
+                state.append(p.state);
+                cpu.append(p.pcpu + '%');
+                tr.appendChild(pid);
+                tr.appendChild(name);
+                tr.appendChild(state);
+                tr.appendChild(cpu);
+                newBody.appendChild(tr);
+            });
+            tableCntx.appendChild(newBody);
+        }
+
         /**
          * Handle the message inside the webview
          */
@@ -206,6 +214,9 @@
                     break;
                 case 'memory':
                     onRefresh(chartMem, message.status);
+                    break;
+                case 'process':
+                    onTableRefrech(message.processes);
                     break;
             }
         });

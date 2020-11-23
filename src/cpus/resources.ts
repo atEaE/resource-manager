@@ -244,17 +244,42 @@ export class Disk implements Resource {
     }
 }
 
+export class Process implements Resource {
+    /**
+     * timeout id.
+     */
+    private intervalId?: NodeJS.Timeout
 
+    /**
+     * Resource identifier name.
+     */
+    public name(): string {
+        return "process";
+    }
 
+    /**
+     * Check the status of the Memory resources.
+     */
+    public update(view: ResourceMonitorView | undefined): void {
+        this.intervalId = setInterval(async () => {
+            if (!view) {
+                return;
+            }
 
+            let processes = await si.processes();
+            view.sendMessage({
+                command: this.name(),
+                processes: processes.list.slice(0, 10),
+            })
+        }, 5000);
+    }
 
-
-
-
-// export class Battery_old {
-//     public async ShowStatusBar(): Promise<string> {
-//         let batteryInfo = await si.battery();
-//         let remainingPercent = Math.min(Math.max(batteryInfo.percent, 0), 100);
-//         return `$(plug) ${remainingPercent}`
-//     }
-// }
+    /**
+     * Release the resource.
+     */
+    public dispose() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId)
+        }
+    }
+}

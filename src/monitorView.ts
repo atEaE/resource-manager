@@ -3,7 +3,7 @@ import { Template, TemplateEngine } from './utils/template';
 import * as path from 'path';
 import { CompositeDisposable, toDisposable } from './utils/disposable';
 import { Logger } from './utils/logger';
-import { CpuUsage, Disk, Memory, Resource } from './cpus/resources';
+import { CpuUsage, Disk, Memory, Process, Resource } from './cpus/resources';
 import { resourceUsage } from 'process';
 
 
@@ -68,6 +68,7 @@ export class ResourceMonitorView extends CompositeDisposable {
 
         // resource 
         this.resources.push(new CpuUsage());
+        this.resources.push(new Process());
         let mem = await new Memory().setup();
         let disk = await new Disk().setup();
         this.panel.webview.html = template.bind({
