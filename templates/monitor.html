@@ -18,6 +18,9 @@
         .custom-header {
             background-color: var(--vscode-sideBar-background);
         }
+        .custom-button {
+            padding: 0px 8px;
+        }
     </style>
     <script>
 
@@ -48,13 +51,14 @@
         <div class="col-md-12 custom-card-wrapper">
             <div class="card custom-card">
                 <div class="card-header custom-header">Process</div>
-                <table id="process-table" class="table table-sm">
+                <table id="process-table" class="table table-sm table-hover">
                     <thead>
                       <tr>
                         <th scope="col" style="width: 15%;">PID</th>
-                        <th scope="col" style="width: 45%;">Name</th>
+                        <th scope="col" style="width: 35%;">Name</th>
                         <th scope="col" style="width: 20%;">State</th>
                         <th scope="col" style="width: 20%;">Cpu</th>
+                        <th scope="col" style="width: 10%;">Action</th>
                       </tr>
                     </thead>
                     <tbody id="process-table-body">
@@ -189,15 +193,24 @@
                 let name = document.createElement('td');
                 let state = document.createElement('td');
                 let cpu = document.createElement('td');
+                let action = document.createElement('td');
+                let button = document.createElement('button');
 
                 pid.append(p.pid);
                 name.append(p.name);
                 state.append(p.state);
                 cpu.append(Math.floor(p.pcpu * 100) / 100 + '%');
+                button.className = "btn btn-danger custom-button";
+                button.append("kill");
+                button.onclick = (hndl, e) => { console.log(hndl);}
+                action.appendChild(button);
+
                 tr.appendChild(pid);
                 tr.appendChild(name);
                 tr.appendChild(state);
                 tr.appendChild(cpu);
+                tr.appendChild(action);
+                tr.className = "tr-row";
                 newBody.appendChild(tr);
             });
             tableCntx.appendChild(newBody);
