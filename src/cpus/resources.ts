@@ -269,7 +269,7 @@ export class Process implements Resource {
             let processes = await si.processes();
             view.sendMessage({
                 command: this.name(),
-                processes: processes.list.slice(0, 10),
+                processes: processes.list.filter(p => p.pcpu > 0).slice(0, 20),
             })
         }, 5000);
     }
